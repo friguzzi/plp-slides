@@ -1,4 +1,4 @@
-#Slides for the book Foundations of Probabilistic Logic Programming 
+# Slides for the book Foundations of Probabilistic Logic Programming 
 
 Book home page http://mcs.unife.it/~friguzzi/plp-book.html
 
