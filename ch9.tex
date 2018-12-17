@@ -553,11 +553,11 @@ $$g(i)=\{j|\theta_j \mbox{ is a grounding substitution for $i$ in } msw(i,x) \}.
 \begin{itemize}
 \item 
 Expectation:
-computes $\mathbf{E}[c_{ik}|e]$ for all examples $e$, switches $msw(i,x)$ and $k\in\{1,\ldots,n_i\}$, where $c_{ik}$ is the number of times a variable $X_{ij}$ takes value $x_{ik}$  with $j$ in $g(i)$.
-$$\mathbf{E}[c_{ik}|e]=\sum_{j\in g(i)}P(X_{ij}=x|e).$$
+computes $\mathbf{E}[c_{ijk}|e]$ for all examples $e$, switches $msw(i\theta_j,x)$ and $k\in\{1,\ldots,n_i\}$, where $c_{ijk}$ is the number of times  variable $X_{ij}$ takes value $x_{ik}$
+$$\mathbf{E}[c_{ijk}|e]=P(X_{ij}=x_{ik}|e).$$
 \item
-Maximization: computes $\Pi_{ik}$ for all $msw(i,x)$ and $k=1,\ldots,n_i-1$ as
-$$\Pi_{ik}=\frac{\sum_{e\in E}\mathbf{E}[c_{ik}|e]}{\sum_{e\in E}\sum_{k=1}^{n_i}\mathbf{E}[c_{ik}|e]}$$
+Maximization: computes $\Pi_{ijk}$ for all $msw(i\theta_j,x)$ and $k=1,\ldots,n_i-1$ as
+$$\Pi_{ijk}=\frac{\sum_{e\in E}\mathbf{E}[c_{ijk}|e]}{\sum_{e\in E}\sum_{k=1}^{n_i}\mathbf{E}[c_{ijk}|e]}$$
 %$$\Pi_{ik}=\frac{\sum_{X_{ijk}\in i(C_{ik})}P(X_{ijk}=1|Q)}{\sum_{X_{ijk}\in i(C_i)}(P(X_{ijk}=0|Q)+P(X_{ijk}=1|Q))}$$
 \end{itemize}
 \end{itemize}
@@ -569,10 +569,10 @@ $$\Pi_{ik}=\frac{\sum_{e\in E}\mathbf{E}[c_{ik}|e]}{\sum_{e\in E}\sum_{k=1}^{n_i
 If the program satisfies the exclusive-or
 assumption, $P(X_{ij}=x_{ik}|e)$ can be computed as
 $$P(X_{ij}=x_{ik}|e)=\frac{P(X_{ij}=x_{ik},e)}{P(e)}=
-\frac{\sum_{\kappa\in K_e,msw(i,x_{ik})\theta_j\in e}P(\kappa)}{P(e)}$$
+\frac{\sum_{\kappa\in K_e,msw(i\theta_j,x_{ik})\in e}P(\kappa)}{P(e)}$$
 where $K_e$ is the set of explanations of $e$ 
 \item Each explanation $\kappa$ is a set of 
-$msw$ atoms of the form $msw(i,x_{ik})$.
+$msw$ atoms of the form $msw(i\theta_j,x_{ik})$.
 \end{itemize}
 \end{frame}
 \begin{frame}
@@ -582,15 +582,15 @@ $msw$ atoms of the form $msw(i,x_{ik})$.
 \State $LL=-\mathit{inf}$
 \Repeat
   \State $LL_0=LL$
-  \ForAll{$i,k$}\Comment{Expectation step}
-    \State $\mathbf{E}[c_{ik}]\gets \sum_{e\in E}\frac{\sum_{\kappa\in K_e,msw(i,x_{ik})\theta_j\in e}P(\kappa)}{P(e)}$
+  \ForAll{$i,j,k$}\Comment{Expectation step}
+    \State $\mathbf{E}[c_{ijk}]\gets \sum_{e\in E}\frac{\sum_{\kappa\in K_e,msw(i\theta_j,x_{ik})\in e}P(\kappa)}{P(e)}$
   \EndFor
-  \ForAll{$i,k$}\Comment{Maximization step}
-    \State $\Pi_{ik}\gets \frac{ \mathbf{E}[c_{ik}]}{\sum_{k'=1}^{n_i}\mathbf{E}[c_{ik'}]}$
+  \ForAll{$i,j,k$}\Comment{Maximization step}
+    \State $\Pi_{ijk}\gets \frac{ \mathbf{E}[c_{ijk}]}{\sum_{k'=1}^{n_i}\mathbf{E}[c_{ijk'}]}$
   \EndFor
   \State $LL\gets \sum_{e\in E}\log P(e)$
 \Until{$LL-LL_0 < \epsilon $}
-\State return $LL,\Pi_{ik}$ for all $i,k$
+\State return $LL,\Pi_{ijk}$ for all $i,j,k$
 \EndFunction
 \end{algorithmic}
 
@@ -661,8 +661,8 @@ learning in HMM by the Baum-Welch algorithm
   \frametitle{Get-Inside-Probs}
 \begin{algorithmic}[1]
 \Procedure{Get-Inside-Probs}{$q$}
-\ForAll{$i,k$}
-  \State $P(msw(i,v_k))\gets \Pi_{ik}$
+\ForAll{$i,j,k$}
+  \State $P(msw(i\theta_j,v_k))\gets \Pi_{ijk}$
 \EndFor
 \For{$i\gets m \to 1$}
   \State   $P(g_i)\gets 0$
@@ -720,7 +720,7 @@ Q(g_i)&=&Q(b_1)\sum_{s=1}^{i_1}\frac{P(g_i,W_{1s})}{P(g_i)}+\ldots+Q(b_K)\sum_{s
   \frametitle{Outside probabilities}
   \begin{itemize}
 \item We can divide the
-explanations for $e$ into two sets, $K_{e1}$, that includes the explanations containing $msw(i,x_k)\theta_j$, and $K_{e2}$, that includes the other explanations.
+explanations for $e$ into two sets, $K_{e1}$, that includes the explanations containing $msw(i\theta_j,x_k)$, and $K_{e2}$, that includes the other explanations.
 \item   $P(e)=P(K_{e1})+ P(K_{e2})$
 \item 
 $P(X_{ij}=x_{ik},e)=P(K_{e1})$.
@@ -742,8 +742,8 @@ P(X_{ij}=x_{ik},e)&=&P(g_i)\sum_{\{g_i, W\} \in K_{e1}}P(W)=\nonumber\\
 &&\frac{\partial P(e)}{\partial P(g_i)}P(g_i)=Q(g_i)P(g_i)\nonumber
 \end{eqnarray}
   \item
-If $g_i=msw(i,x_k)\theta_j$, then 
-$$P(X_{ij}=x_{ik},e)=Q(g_i)P(g_i)=Q(g_i)\Pi_{ik}.$$
+If $g_i=msw(i\theta_j,x_k)$, then 
+$$P(X_{ij}=x_{ik},e)=Q(g_i)P(g_i)=Q(g_i)\Pi_{ijk}.$$
 \end{itemize}
 \end{frame}
 
@@ -777,14 +777,14 @@ $$P(X_{ij}=x_{ik},e)=Q(g_i)P(g_i)=Q(g_i)\Pi_{ik}.$$
 \Repeat
   \State $LL_0=LL$
   \State $LL=$ \Call{Expectation}{$E$}
-  \ForAll{$i$}
-    \State $Sum\gets\sum_{k=1}^{n_i}\mathbf{E}[c_{ik}]$
+  \ForAll{$i,j$}
+    \State $Sum\gets\sum_{k=1}^{n_i}\mathbf{E}[c_{ijk}]$
     \For{$k=1$ to $n_i$}
-      \State $\Pi_{ik}=\frac{\mathbf{E}[c_{ik}]}{Sum}$
+      \State $\Pi_{ijk}=\frac{\mathbf{E}[c_{ijk}]}{Sum}$
     \EndFor
   \EndFor
 \Until{$LL-LL_0 < \epsilon $}
-\State\Return  $LL,\Pi_{ik}$ for all $i,k$
+\State\Return  $LL,\Pi_{ijk}$ for all $i,j,k$
 \EndFunction
 \end{algorithmic}
 \end{frame}
@@ -798,9 +798,9 @@ $$P(X_{ij}=x_{ik},e)=Q(g_i)P(g_i)=Q(g_i)\Pi_{ik}.$$
 \ForAll{$e\in E$}
   \State \Call{Get-Inside-Probs}{$e$}
   \State \Call{Get-Outside-Probs}{$e$}
-  \ForAll{$i$}
+  \ForAll{$i,j$}
     \For{$k=1$ to $n_i$}
-      \State $\mathbf{E}[c_{ik}]=\mathbf{E}[c_{ik}]+Q(msw(i,x_k))\Pi_{ik}/P(e)$
+      \State $\mathbf{E}[c_{ijk}]=\mathbf{E}[c_{ijk}]+Q(msw(i\theta_j,x_k))\Pi_{ijk}/P(e)$
 %\eta^0(r,i)=\eta^0(r,i)+\eta^0(r,i)/Prob$;   $\eta^1(r,i)=\eta^1(r,i)+\eta_t^1(r,i)/Prob$
     \EndFor
   \EndFor
@@ -1006,7 +1006,7 @@ $\ranvar{X}_{ij1},\ldots,\ranvar{X}_{ijn-1}.$
 \begin{eqnarray*}
 P(\ranvar{X}_{ij1})&=&P(\ranvar{X}_{ij}=1)\\
 &\ldots&\\
- P(\ranvar{X}_{ijk})&=&\frac{P(\ranvar{X}_{ij}=k)}{\prod_{l=1}^{k-1}(1-P(\ranvar{X}_{ijk-1}))}
+ P(\ranvar{X}_{ijk})&=&\frac{P(\ranvar{X}_{ij}=k)}{\prod_{l=1}^{k-1}(1-P(\ranvar{X}_{ijl}))}
  \end{eqnarray*}
  \end{itemize}
 \end{frame}
@@ -1065,7 +1065,7 @@ computes $\mathbf{E}[c_{ik0}|e]$ and $\mathbf{E}[c_{ik1}|e]$ for all examples $e
 $\mathbf{E}[c_{ikx}|e]$ is given by $\sum_{j\in g(i)}P(X_{ijk}=x|e).$
 \item
 Maximization: computes $\pi_{ik}$ for all rules $C_i$ and $k=1,\ldots,n_i-1$.
-$$\pi_{ik}=\frac{\sum_{e\in E}\mathbf{E}[c_{ik1}|e]}{\sum_{q\in E}\mathbf{E}[c_{ik0}|e]+\mathbf{E}[c_{ik1}|e]}$$
+$$\pi_{ik}=\frac{\sum_{e\in E}\mathbf{E}[c_{ik1}|e]}{\sum_{e\in E}\mathbf{E}[c_{ik0}|e]+\mathbf{E}[c_{ik1}|e]}$$
 %$$\pi_{ik}=\frac{\sum_{X_{ijk}\in i(C_{ik})}P(X_{ijk}=1|Q)}{\sum_{X_{ijk}\in i(C_i)}(P(X_{ijk}=0|Q)+P(X_{ijk}=1|Q))}$$
 \end{itemize}
 \end{itemize}
@@ -1483,14 +1483,14 @@ zeroarrow/.style = {-{Latex[length=1.5mm,width=1.5mm]},dashed},
 
 \begin{frame}
  \frametitle{Computing Expectations}
-$$\WMC(\phi)=\sum_{\omega\in SAT(\phi)}\prod_{l\in \omega}w(l)\lambda_l=\sum_{\omega\in SAT(\phi)}\prod_{l\in \omega}w(l)\prod_{l\in \omega}\lambda_l$$
+$$\WMC(\phi)=\sum_{\omega\in SAT(\phi)}\prod_{l\in \omega}w(l)\lambda(l)=\sum_{\omega\in SAT(\phi)}\prod_{l\in \omega}w(l)\prod_{l\in \omega}\lambda(l)$$
 \begin{itemize}
 \item
 We want to compute 
 $P(q|e)$ for all atoms $q\in Q$. 
 \item Partial derivative $\frac{\partial f}{\partial \lambda_q}$ for an atom $q$:\index{partial derivative}
 \begin{eqnarray*}
-\frac{\partial f}{\partial \lambda_q}&=&\sum_{\omega\in SAT(\phi),q\in\omega}\prod_{l\in \omega}w(l)\prod_{l\in \omega,l\neq q}\lambda_l=\\
+\frac{\partial f}{\partial \lambda_q}&=&\sum_{\omega\in SAT(\phi),q\in\omega}\prod_{l\in \omega}w(l)\prod_{l\in \omega,l\neq q}\lambda(l)=\\
 &&\sum_{\omega\in SAT(\phi),q\in\omega}\prod_{l\in \omega}w(l)=\\
 &&P(e,q)
 \end{eqnarray*}
